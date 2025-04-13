@@ -29,7 +29,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
   const events = req.body.events;
 
 for (const event of events) {
