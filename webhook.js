@@ -1,7 +1,7 @@
 // webhook.js
 // Firestore（ノート）を使う準備
 const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccount.json'); // ← ダウンロードしたJSONファイル
+const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
