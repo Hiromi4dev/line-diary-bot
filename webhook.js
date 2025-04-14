@@ -62,7 +62,8 @@ for (const event of events) {
 
     // Firestoreに保存！
     await saveToFirestore(userId, userMessage);
-    await replyToUser(event.replyToken, "お疲れさまです！少し休んでくださいね☕");
+    const aiReply = await callDify(userId, userMessage);
+    await replyToUser(event.replyToken, aiReply);
 
   }
 }
