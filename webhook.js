@@ -3,6 +3,9 @@
 const admin = require('firebase-admin');
 const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 const axios = require('axios'); // ← ファイルの上の方に書いておく（1回だけ）
+const DIFY_API_KEY = process.env.DIFY_API_KEY;
+const DIFY_APP_ID = process.env.DIFY_APP_ID;
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -65,5 +68,31 @@ for (const event of events) {
 }
   res.sendStatus(200);
 });
+
+async function callDify(userId, messageText) {
+  try {
+    const response = await axios.post(
+      'https://api.dify.ai/v1/chat-messages',
+      {
+        inputs: {}, // 入力フィールド使ってなければ空でOK
+        query: messageText,
+        response_mode: 'blocking',
+        user: userId,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${DIFY_API_KEY}`,
+          'Content-Type': 'application/json',
+          'X-API-KEY': DIFY_API_KEY,
+          'App-Id': DIFY_APP_ID,
+        },
+      }
+    );
+    return response.data.answer;
+  } catch (error) {
+    console.error('Dify error:', error.response?.data || error.message);
+    return 'うまく応答できなかったみたい…ごめんね！';
+  }
+}
 
 app.listen(process.env.PORT || 3000);
