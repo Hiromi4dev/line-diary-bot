@@ -63,7 +63,7 @@ for (const event of events) {
     // Firestoreに保存！
     await saveToFirestore(userId, userMessage);
     const aiReply = await callDify(userId, userMessage);
-    await replyToUser(event.replyToken, aiReply,'user');
+    await replyToUser(event.replyToken, aiReply); // ここの'user'は省略でいい、関数のほうに定義されているから。
     await saveToFirestore(userId, aiReply, 'bot');  // ← NEW!
 
 
