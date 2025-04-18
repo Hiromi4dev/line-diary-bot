@@ -64,6 +64,8 @@ for (const event of events) {
     await saveToFirestore(userId, userMessage);
     const aiReply = await callDify(userId, userMessage);
     await replyToUser(event.replyToken, aiReply);
+    await saveToFirestore(userId, aiReply, 'bot');  // ← NEW!
+
 
   }
 }
