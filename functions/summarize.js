@@ -30,7 +30,12 @@ async function generateSummary() {
     return;
   }
 
-  const fullText = messagesSnapshot.docs.map(doc => doc.data().text).join('\n');
+  const fullText = messagesSnapshot.docs.map(doc => {
+    const data = doc.data();
+    const speaker = data.role === 'user' ? 'ユーザー' : 'Bot';
+    return `${speaker}：${data.text}`;
+  }).join('\n');
+
 
   const prompt = `以下の会話内容をもとに、今日一日がどんな日だったかを簡潔に日記形式でまとめてください。\n\n${fullText}`;
 
