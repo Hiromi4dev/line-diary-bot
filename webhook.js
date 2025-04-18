@@ -14,7 +14,7 @@ admin.initializeApp({
 const db = admin.firestore(); // Firestoreの「ノートを開く」
 
 // Firestoreにメッセージを保存する関数
-async function saveToFirestore(userId, text) {
+async function saveToFirestore(userId, text, role = 'user') {
   const today = new Date().toISOString().split('T')[0]; // "2025-04-13" みたいな日付にする
 
   await db.collection('users')
@@ -25,7 +25,7 @@ async function saveToFirestore(userId, text) {
     .add({
       text: text,
       timestamp: new Date().toISOString(),
-      role: 'user'
+      role: role
     });
 }
 
@@ -63,7 +63,7 @@ for (const event of events) {
     // Firestoreに保存！
     await saveToFirestore(userId, userMessage);
     const aiReply = await callDify(userId, userMessage);
-    await replyToUser(event.replyToken, aiReply);
+    await replyToUser(event.replyToken, aiReply,'user');
     await saveToFirestore(userId, aiReply, 'bot');  // ← NEW!
 
 
