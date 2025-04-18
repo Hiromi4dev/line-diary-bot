@@ -74,24 +74,52 @@ for (const event of events) {
 
 async function callDify(userId, messageText) {
   try {
+    // 🔽 ① 過去3日分の summary を取得
+    const logsSnapshot = await db
+      .collection('users')
+      .doc(userId)
+      .collection('logs')
+      .orderBy('summary.generatedAt', 'desc')
+      .limit(3)
+      .get();
+
+    // 🔽 ② summaryが存在するものだけ抽出して整形
+    const contextText = logsSnapshot.docs
+      .filter(doc => doc.data().summary?.text)
+      .reverse()
+      .map(doc => `【${doc.id}】\n${doc.data().summary.text}`)
+      .join('\n\n');
+
+    // 🔽 ③ Difyに渡すプロンプトを生成
+    const prompt = `
+以下はユーザーの過去3日分の要約です。
+これらを踏まえ、現在の発言に対して自然に応答してください。
+
+${contextText}
+
+ユーザー：${messageText}
+`;
+
+    // 🔽 ④ Dify API呼び出し
     const response = await axios.post(
       'https://api.dify.ai/v1/chat-messages',
       {
-        inputs: {}, // 入力フィールド使ってなければ空でOK
-        query: messageText,
+        inputs: {},
+        query: prompt,
         response_mode: 'blocking',
         user: userId,
       },
       {
         headers: {
-          'Authorization': `Bearer ${DIFY_API_KEY}`,
-          'Content-Type': 'application/json',
-          'X-API-KEY': DIFY_API_KEY,
+          Authorization: `Bearer ${DIFY_API_KEY}`,
           'App-Id': DIFY_APP_ID,
+          'Content-Type': 'application/json',
         },
       }
     );
+
     return response.data.answer;
+
   } catch (error) {
     console.error('Dify error:', error.response?.data || error.message);
     return 'うまく応答できなかったみたい…ごめんね！';
